@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heavy Metal Pollution Index (HMPI) Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Advanced web application for computing Heavy Metal Pollution Index (HMPI) for groundwater quality analysis">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span class="icon">🧪</span>
+                    HMPI Calculator
+                </h1>
+                <p class="app-subtitle">Heavy Metal Pollution Index for Groundwater Quality Analysis</p>
+                <div class="header-controls">
+                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button id="helpBtn" class="help-btn" aria-label="Help and information">
+                        <span>?</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="input">Data Input</button>
+            <button class="tab-btn" data-tab="results">Results</button>
+            <button class="tab-btn" data-tab="visualization">Visualization</button>
+            <button class="tab-btn" data-tab="map">Location Map</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Data Input Tab -->
+            <section id="input-tab" class="tab-content active">
+                <div class="input-section">
+                    <div class="input-methods">
+                        <div class="method-card">
+                            <h3>Manual Input</h3>
+                            <form id="manualForm" class="manual-form">
+                                <div class="form-group">
+                                    <label for="sampleName">Sample Name/ID:</label>
+                                    <input type="text" id="sampleName" required>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="latitude">Latitude:</label>
+                                        <input type="number" id="latitude" step="any" placeholder="e.g., 40.7128">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="longitude">Longitude:</label>
+                                        <input type="number" id="longitude" step="any" placeholder="e.g., -74.0060">
+                                    </div>
+                                </div>
+
+                                <div class="metals-grid">
+                                    <div class="form-group">
+                                        <label for="cd">Cadmium (Cd) mg/L:</label>
+                                        <input type="number" id="cd" step="any" min="0" required>
+                                        <button type="button" class="info-btn" data-metal="cd">ℹ️</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pb">Lead (Pb) mg/L:</label>
+                                        <input type="number" id="pb" step="any" min="0" required>
+                                        <button type="button" class="info-btn" data-metal="pb">ℹ️</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cr">Chromium (Cr) mg/L:</label>
+                                        <input type="number" id="cr" step="any" min="0" required>
+                                        <button type="button" class="info-btn" data-metal="cr">ℹ️</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cu">Copper (Cu) mg/L:</label>
+                                        <input type="number" id="cu" step="any" min="0" required>
+                                        <button type="button" class="info-btn" data-metal="cu">ℹ️</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="zn">Zinc (Zn) mg/L:</label>
+                                        <input type="number" id="zn" step="any" min="0" required>
+                                        <button type="button" class="info-btn" data-metal="zn">ℹ️</button>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ni">Nickel (Ni) mg/L:</label>
+                                        <input type="number" id="ni" step="any" min="0" required>
+                                        <button type="button" class="info-btn" data-metal="ni">ℹ️</button>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Calculate HMPI</button>
+                            </form>
+                        </div>
+
+                        <div class="method-card">
+                            <h3>File Upload</h3>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <div class="upload-content">
+                                    <span class="upload-icon">📁</span>
+                                    <p>Drop CSV or JSON file here or click to browse</p>
+                                    <input type="file" id="fileInput" accept=".csv,.json" hidden>
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                                        Choose File
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="file-format-info">
+                                <h4>Expected Format:</h4>
+                                <p><strong>CSV:</strong> sampleName,latitude,longitude,cd,pb,cr,cu,zn,ni</p>
+                                <p><strong>JSON:</strong> Array of objects with the same properties</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="samples-list" id="samplesList">
+                        <h3>Added Samples</h3>
+                        <div class="samples-container" id="samplesContainer">
+                            <p class="no-samples">No samples added yet</p>
+                        </div>
+                        <div class="batch-actions" id="batchActions" style="display: none;">
+                            <button class="btn btn-primary" id="calculateAllBtn">Calculate All HMPI</button>
+                            <button class="btn btn-secondary" id="clearAllBtn">Clear All</button>
+                            <button class="btn btn-secondary" id="exportBtn">Export Results</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Tab -->
+            <section id="results-tab" class="tab-content">
+                <div class="results-section">
+                    <div class="results-header">
+                        <h3>HMPI Results</h3>
+                        <div class="filter-controls">
+                            <select id="categoryFilter">
+                                <option value="all">All Categories</option>
+                                <option value="safe">Safe (HMPI ≤ 100)</option>
+                                <option value="moderate">Moderate (100 < HMPI ≤ 200)</option>
+                                <option value="hazardous">Hazardous (HMPI > 200)</option>
+                            </select>
+                            <select id="sortBy">
+                                <option value="hmpi-desc">HMPI (High to Low)</option>
+                                <option value="hmpi-asc">HMPI (Low to High)</option>
+                                <option value="name">Sample Name</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="results-summary" id="resultsSummary" style="display: none;">
+                        <div class="summary-card safe">
+                            <h4>Safe</h4>
+                            <span class="count" id="safeCount">0</span>
+                        </div>
+                        <div class="summary-card moderate">
+                            <h4>Moderate</h4>
+                            <span class="count" id="moderateCount">0</span>
+                        </div>
+                        <div class="summary-card hazardous">
+                            <h4>Hazardous</h4>
+                            <span class="count" id="hazardousCount">0</span>
+                        </div>
+                    </div>
+
+                    <div class="results-table-container">
+                        <table class="results-table" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th>Sample Name</th>
+                                    <th>Location</th>
+                                    <th>HMPI Value</th>
+                                    <th>Category</th>
+                                    <th>Dominant Metal</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+                                <tr class="no-results">
+                                    <td colspan="6">No results available. Please add samples and calculate HMPI.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualization Tab -->
+            <section id="visualization-tab" class="tab-content">
+                <div class="visualization-section">
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-chart="bar">Bar Chart</button>
+                        <button class="chart-btn" data-chart="pie">Pie Chart</button>
+                        <button class="chart-btn" data-chart="line">Trend Line</button>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="chartCanvas" width="800" height="400"></canvas>
+                        <div class="chart-legend" id="chartLegend"></div>
+                    </div>
+                    
+                    <div class="chart-info" id="chartInfo">
+                        <p>Add samples and calculate HMPI to view visualizations</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Map Tab -->
+            <section id="map-tab" class="tab-content">
+                <div class="map-section">
+                    <div class="map-controls">
+                        <div class="map-legend">
+                            <h4>HMPI Categories</h4>
+                            <div class="legend-item safe">
+                                <span class="legend-color"></span>
+                                Safe (≤ 100)
+                            </div>
+                            <div class="legend-item moderate">
+                                <span class="legend-color"></span>
+                                Moderate (100-200)
+                            </div>
+                            <div class="legend-item hazardous">
+                                <span class="legend-color"></span>
+                                Hazardous (> 200)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="map-container">
+                        <canvas id="mapCanvas" width="800" height="500"></canvas>
+                        <div class="map-tooltip" id="mapTooltip"></div>
+                    </div>
+                    
+                    <div class="map-info">
+                        <p>Sample locations will be displayed here based on provided coordinates</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>HMPI Calculator Help</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>About Heavy Metal Pollution Index (HMPI)</h4>
+                <p>The Heavy Metal Pollution Index is a comprehensive method for assessing groundwater quality based on heavy metal concentrations. It considers the relative importance of different metals and their potential health impacts.</p>
+                
+                <h4>HMPI Categories:</h4>
+                <ul>
+                    <li><strong>Safe (HMPI ≤ 100):</strong> Water is suitable for consumption with minimal health risks</li>
+                    <li><strong>Moderate (100 < HMPI ≤ 200):</strong> Water requires treatment before consumption</li>
+                    <li><strong>Hazardous (HMPI > 200):</strong> Water is unsuitable for consumption and poses significant health risks</li>
+                </ul>
+                
+                <h4>How to Use:</h4>
+                <ol>
+                    <li>Enter sample data manually or upload a CSV/JSON file</li>
+                    <li>Include heavy metal concentrations in mg/L</li>
+                    <li>Optionally provide GPS coordinates for mapping</li>
+                    <li>Calculate HMPI and view results in various formats</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div id="metalInfoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="metalInfoTitle">Metal Information</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="metalInfoBody">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal">
+        <div class="modal-content error">
+            <div class="modal-header">
+                <h3>Error</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="errorModalBody">
+                <!-- Error content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
